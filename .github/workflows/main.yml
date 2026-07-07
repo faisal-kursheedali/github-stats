@@ -2,7 +2,7 @@ name: Generate Stats Images
 
 on:
   push:
-    branches: 
+    branches:
       - master
   schedule:
     - cron: "5 0 * * *"
@@ -49,6 +49,13 @@ jobs:
         # TODO: Remove this when they get their API working again
         # https://github.com/orgs/community/discussions/192970
         MAX_RETRIES: 5
+
+    - name: Generate streak stats card
+      uses: DenverCoder1/github-readme-streak-stats@v3
+      with:
+        path: "streak.svg"
+        options: "-user faisal-kursheedali -theme tokyonight -hide_border true"
+        token: ${{ secrets.ACCESS_TOKEN }}
 
     - name: Commit to the repo
       run: |
