@@ -50,11 +50,18 @@ jobs:
         # https://github.com/orgs/community/discussions/192970
         MAX_RETRIES: 5
 
-    - name: Generate streak stats card
+    - name: Generate streak stats card (dark)
       uses: DenverCoder1/github-readme-streak-stats@v1.7.0
       with:
-        path: "streak.svg"
+        path: "streak-dark.svg"
         options: "-user faisal-kursheedali -theme tokyonight -hide_border true"
+        token: ${{ secrets.ACCESS_TOKEN }}
+
+    - name: Generate streak stats card (light)
+      uses: DenverCoder1/github-readme-streak-stats@v1.7.0
+      with:
+        path: "streak-light.svg"
+        options: "-user faisal-kursheedali -theme default -hide_border true"
         token: ${{ secrets.ACCESS_TOKEN }}
 
     - name: Commit to the repo
