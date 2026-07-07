@@ -51,7 +51,7 @@ jobs:
         MAX_RETRIES: 5
 
     - name: Generate streak stats card
-      uses: DenverCoder1/github-readme-streak-stats@v3
+      uses: DenverCoder1/github-readme-streak-stats@v1.7.0
       with:
         path: "streak.svg"
         options: "-user faisal-kursheedali -theme tokyonight -hide_border true"
