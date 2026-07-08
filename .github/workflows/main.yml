@@ -40,7 +40,10 @@ jobs:
         npm i --omit=dev --ignore-scripts
         npm i express --ignore-scripts
         PAT_1="${{ secrets.ACCESS_TOKEN }}" node express.js &
-        npx --yes wait-on http://localhost:9000
+        for i in $(seq 1 30); do
+          curl -sf "http://localhost:9000/api?username=faisal-kursheedali" -o /dev/null && break
+          sleep 1
+        done
       env:
         PAT_1: ${{ secrets.ACCESS_TOKEN }}
 
