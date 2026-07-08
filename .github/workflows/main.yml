@@ -21,47 +21,48 @@ jobs:
     steps:
     - uses: actions/checkout@v6
 
-    - uses: mlugg/setup-zig@d1434d08867e3ee9daa34448df10607b98908d29  # v2 tag
-      with:
-        version: 0.16.0
-
-    - name: Build
-      run: |
-        zig build
-
     - name: Checkout history branch
       run: |
-        git config --global user.name "jstrieb/github-stats"
-        git config --global user.email "github-stats[bot]@jstrieb.github.io"
+        git config --global user.name "github-stats[bot]"
+        git config --global user.email "github-stats[bot]@users.noreply.github.com"
         # Push generated files to the generated branch
         git pull
         git checkout generated || git checkout -b generated
 
-    - name: Generate images
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
+    - name: Self-host github-readme-stats (for the rank/grade circle)
       run: |
-        ./zig-out/bin/github-stats
+        git clone --depth 1 https://github.com/anuraghazra/github-readme-stats.git /tmp/grs
+        cd /tmp/grs
+        npm i --omit=dev
+        npm i express
+        PAT_1="${{ secrets.ACCESS_TOKEN }}" node express.js &
+        npx --yes wait-on http://localhost:9000
       env:
-        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        EXCLUDE_REPOS: ${{ secrets.EXCLUDE_REPOS }}
-        EXCLUDE_LANGS: ${{ secrets.EXCLUDE_LANGS }}
-        EXCLUDE_PRIVATE: "false"
-        SILENT: "true"
-        # TODO: Remove this when they get their API working again
-        # https://github.com/orgs/community/discussions/192970
-        MAX_RETRIES: 5
+        PAT_1: ${{ secrets.ACCESS_TOKEN }}
+
+    - name: Generate stats + languages cards (dark & light, with rank circle)
+      run: |
+        curl -sf "http://localhost:9000/api?username=faisal-kursheedali&show_icons=true&hide_border=true&theme=tokyonight&rank_icon=github&include_all_commits=true&count_private=true" -o stats-dark.svg
+        curl -sf "http://localhost:9000/api?username=faisal-kursheedali&show_icons=true&hide_border=true&theme=default&rank_icon=github&include_all_commits=true&count_private=true" -o stats-light.svg
+        curl -sf "http://localhost:9000/api/top-langs/?username=faisal-kursheedali&layout=compact&hide_border=true&theme=tokyonight" -o languages-dark.svg
+        curl -sf "http://localhost:9000/api/top-langs/?username=faisal-kursheedali&layout=compact&hide_border=true&theme=default" -o languages-light.svg
 
     - name: Generate streak stats card (dark)
       uses: DenverCoder1/github-readme-streak-stats@v1.7.0
       with:
         path: "streak-dark.svg"
-        options: "-user faisal-kursheedali -theme tokyonight -hide_border true"
+        options: "user=faisal-kursheedali&theme=tokyonight&hide_border=true"
         token: ${{ secrets.ACCESS_TOKEN }}
 
     - name: Generate streak stats card (light)
       uses: DenverCoder1/github-readme-streak-stats@v1.7.0
       with:
         path: "streak-light.svg"
-        options: "-user faisal-kursheedali -theme default -hide_border true"
+        options: "user=faisal-kursheedali&theme=default&hide_border=true"
         token: ${{ secrets.ACCESS_TOKEN }}
 
     - name: Commit to the repo
