@@ -37,8 +37,8 @@ jobs:
       run: |
         git clone --depth 1 https://github.com/anuraghazra/github-readme-stats.git /tmp/grs
         cd /tmp/grs
-        npm i --omit=dev
-        npm i express
+        npm i --omit=dev --ignore-scripts
+        npm i express --ignore-scripts
         PAT_1="${{ secrets.ACCESS_TOKEN }}" node express.js &
         npx --yes wait-on http://localhost:9000
       env:
