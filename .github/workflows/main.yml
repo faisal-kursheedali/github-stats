@@ -47,10 +47,12 @@ jobs:
       env:
         PAT_1: ${{ secrets.ACCESS_TOKEN }}
 
-    - name: Generate stats + languages cards (dark & light, with rank circle)
+    - name: Generate stats + languages cards (dark & light, grade + icon variants)
       run: |
         curl -sf "http://localhost:9000/api?username=faisal-kursheedali&show_icons=true&hide_border=true&theme=tokyonight&rank_icon=default&include_all_commits=true&count_private=true" -o stats-dark.svg
         curl -sf "http://localhost:9000/api?username=faisal-kursheedali&show_icons=true&hide_border=true&theme=default&rank_icon=default&include_all_commits=true&count_private=true" -o stats-light.svg
+        curl -sf "http://localhost:9000/api?username=faisal-kursheedali&show_icons=true&hide_border=true&theme=tokyonight&rank_icon=github&include_all_commits=true&count_private=true" -o stats-dark-icon.svg
+        curl -sf "http://localhost:9000/api?username=faisal-kursheedali&show_icons=true&hide_border=true&theme=default&rank_icon=github&include_all_commits=true&count_private=true" -o stats-light-icon.svg
         curl -sf "http://localhost:9000/api/top-langs/?username=faisal-kursheedali&layout=compact&hide_border=true&theme=tokyonight" -o languages-dark.svg
         curl -sf "http://localhost:9000/api/top-langs/?username=faisal-kursheedali&layout=compact&hide_border=true&theme=default" -o languages-light.svg
 
