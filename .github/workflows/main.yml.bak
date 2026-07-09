@@ -23,11 +23,8 @@ jobs:
 
     - name: Checkout history branch
       run: |
-        # Commit author changed to faisal.k.ison@gmail.com so generated commits
-        # count toward the GitHub contribution graph (must be a verified email
-        # on the account). Previous bot identity backed up in main.yml.bak.
-        git config --global user.name "FAISAL"
-        git config --global user.email "faisal.k.ison@gmail.com"
+        git config --global user.name "github-stats[bot]"
+        git config --global user.email "github-stats[bot]@users.noreply.github.com"
         # Push generated files to the generated branch
         git pull
         git checkout generated || git checkout -b generated
