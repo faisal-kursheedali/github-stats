@@ -5,7 +5,7 @@ on:
     branches:
       - master
   schedule:
-    - cron: "5 0 * * *"
+    - cron: "25 18 * * *"
   workflow_dispatch:
 
 permissions:
@@ -21,13 +21,40 @@ jobs:
     steps:
     - uses: actions/checkout@v6
 
+    - name: Determine commit identity
+      id: identity
+      env:
+        GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+      run: |
+        # Only borrow the personal identity when it actually helps the streak,
+        # i.e. no contribution has landed on the account yet today. If the
+        # streak is already covered, commit as the bot so the profile doesn't
+        # fill up with commits that weren't really "worked on" that day.
+        FROM="$(date -u +%Y-%m-%d)T00:00:00Z"
+        TO="$(date -u +%Y-%m-%d)T23:59:59Z"
+        COUNT=$(gh api graphql -f query='
+          query($login: String!, $from: DateTime!, $to: DateTime!) {
+            user(login: $login) {
+              contributionsCollection(from: $from, to: $to) {
+                contributionCalendar { totalContributions }
+              }
+            }
+          }' -f login="faisal-kursheedali" -f from="$FROM" -f to="$TO" \
+          --jq '.data.user.contributionsCollection.contributionCalendar.totalContributions')
+        echo "Contributions today so far: $COUNT"
+
+        if [ "$COUNT" -gt 0 ]; then
+          echo "name=github-actions[bot]" >> "$GITHUB_OUTPUT"
+          echo "email=41898282+github-actions[bot]@users.noreply.github.com" >> "$GITHUB_OUTPUT"
+        else
+          echo "name=${{ vars.GIT_USER_NAME }}" >> "$GITHUB_OUTPUT"
+          echo "email=${{ vars.GIT_USER_EMAIL }}" >> "$GITHUB_OUTPUT"
+        fi
+
     - name: Checkout history branch
       run: |
-        # Commit author changed to faisal.k.ison@gmail.com so generated commits
-        # count toward the GitHub contribution graph (must be a verified email
-        # on the account). Previous bot identity backed up in main.yml.bak.
-        git config --global user.name "FAISAL"
-        git config --global user.email "faisal.k.ison@gmail.com"
+        git config --global user.name "${{ steps.identity.outputs.name }}"
+        git config --global user.email "${{ steps.identity.outputs.email }}"
         # Push generated files to the generated branch
         git pull
         git checkout generated || git checkout -b generated
