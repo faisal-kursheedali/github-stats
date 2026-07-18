@@ -30,8 +30,11 @@ jobs:
         # i.e. no contribution has landed on the account yet today. If the
         # streak is already covered, commit as the bot so the profile doesn't
         # fill up with commits that weren't really "worked on" that day.
-        FROM="$(date -u +%Y-%m-%d)T00:00:00Z"
-        TO="$(date -u +%Y-%m-%d)T23:59:59Z"
+        # Use IST day boundaries (not UTC) so the window matches the same
+        # calendar day the cron schedule is tuned for.
+        IST_DATE="$(TZ=Asia/Kolkata date +%Y-%m-%d)"
+        FROM="$(date -u -d "${IST_DATE} 00:00:00 +0530" +%Y-%m-%dT%H:%M:%SZ)"
+        TO="$(date -u -d "${IST_DATE} 23:59:59 +0530" +%Y-%m-%dT%H:%M:%SZ)"
         COUNT=$(gh api graphql -f query='
           query($login: String!, $from: DateTime!, $to: DateTime!) {
             user(login: $login) {
